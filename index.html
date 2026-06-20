@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SIX SEVEN</title>
 
 <style>
@@ -15,31 +15,31 @@ text-align:center;
 }
 
 header{
-padding:20px;
+padding:18px;
 border-bottom:2px solid #D4AF37;
 box-shadow:0 0 20px #D4AF37;
 }
 
 h1{
 color:#D4AF37;
-letter-spacing:4px;
+letter-spacing:5px;
 margin:0;
 }
 
 small{color:#aaa;}
 
 video{
-width:90%;
-max-width:400px;
-margin-top:20px;
+width:92%;
+max-width:420px;
+margin-top:15px;
 border-radius:20px;
 border:2px solid #D4AF37;
 box-shadow:0 0 20px #D4AF37;
 }
 
 button{
-margin:10px;
-padding:12px 20px;
+margin:8px;
+padding:12px 18px;
 background:#D4AF37;
 border:none;
 border-radius:30px;
@@ -47,22 +47,20 @@ font-weight:bold;
 cursor:pointer;
 }
 
-button:hover{
-transform:scale(1.05);
-}
+button:hover{transform:scale(1.05);}
 
 .card{
 background:#161616;
-margin:15px auto;
-padding:15px;
-width:90%;
-max-width:400px;
+margin:12px auto;
+padding:14px;
+width:92%;
+max-width:420px;
 border-radius:15px;
 border:1px solid #D4AF37;
 }
 
 .bar{
-height:18px;
+height:16px;
 background:#333;
 border-radius:20px;
 overflow:hidden;
@@ -76,9 +74,9 @@ transition:1s;
 }
 
 #timer{
-font-size:22px;
+font-size:20px;
 color:#F5D76E;
-margin-top:10px;
+margin-top:8px;
 }
 
 #perfil{
@@ -87,12 +85,11 @@ color:#F5D76E;
 margin-top:10px;
 }
 
-#detalhado{
+#detalhe{
 color:#ccc;
-font-size:14px;
+font-size:13px;
 margin-top:10px;
 line-height:1.5;
-padding:10px;
 }
 </style>
 </head>
@@ -101,20 +98,20 @@ padding:10px;
 
 <header>
 <h1>SIX SEVEN</h1>
-<small>Black Gold Edition</small>
+<small>Black Gold Intelligence</small>
 </header>
 
 <video id="video" autoplay playsinline></video>
 
-<br/>
+<br>
 
 <button onclick="start()">INICIAR ANÁLISE</button>
-<button onclick="trocarCamera()">INVERTER CÂMERA</button>
+<button onclick="flipCamera()">INVERTER CÂMERA</button>
 
 <div id="timer">50s</div>
 
 <div class="card">
-<h3>🌟 Energia</h3>
+<h3>🌟 Energia de Movimento</h3>
 <div class="bar"><div id="energiaBar" class="fill"></div></div>
 <p id="energiaTxt">0%</p>
 </div>
@@ -126,105 +123,115 @@ padding:10px;
 </div>
 
 <div class="card">
+<h3>👁️ Expressividade</h3>
+<div class="bar"><div id="expBar" class="fill"></div></div>
+<p id="expTxt">0%</p>
+</div>
+
+<div class="card">
 <h3>⭐ Perfil</h3>
 <div id="perfil">-</div>
 
-<div id="detalhado">
-Aguardando análise...
-</div>
-
+<div id="detalhe">Aguardando análise...</div>
 </div>
 
 <script>
 
 let time = 50;
 let interval;
-let currentStream;
-let facingMode = "user";
+let stream;
+let facing = "user";
+let motionSeed = 0;
 
 async function start(){
 
 time = 50;
 
-const video = document.getElementById("video");
-
-const stream = await navigator.mediaDevices.getUserMedia({
-video:{ facingMode }
+stream = await navigator.mediaDevices.getUserMedia({
+video:{facingMode:facing}
 });
 
-currentStream = stream;
+document.getElementById("video").srcObject = stream;
 
-video.srcObject = stream;
-
-interval = setInterval(timer,1000);
+interval = setInterval(loop,1000);
 }
 
-function timer(){
+function loop(){
 
 time--;
 
 document.getElementById("timer").innerText = time + "s";
 
-if(time <= 0){
-clearInterval(interval);
-analyze();
-}
-}
+// simula variação de movimento (dança/gestos)
+motionSeed = Math.random()*100;
 
-function analyze(){
-
-let energia = Math.floor(Math.random()*100);
+// métricas simuladas inteligentes
+let energia = Math.floor((motionSeed + Math.random()*50));
 let ego = Math.floor(Math.random()*100);
+let expressividade = Math.floor(motionSeed);
 
 document.getElementById("energiaBar").style.width = energia+"%";
 document.getElementById("egoBar").style.width = ego+"%";
+document.getElementById("expBar").style.width = expressividade+"%";
 
 document.getElementById("energiaTxt").innerText = energia+"%";
 document.getElementById("egoTxt").innerText = ego+"%";
+document.getElementById("expTxt").innerText = expressividade+"%";
 
-let perfis = [
+if(time <= 0){
+clearInterval(interval);
+result(energia,ego,expressividade);
+}
+}
+
+function result(energia,ego,exp){
+
+let perfis=[
 "LÍDER",
 "CRIATIVO",
 "ANALÍTICO",
 "COMUNICADOR",
-"EQUILIBRADO"
+"PERFORMER"
 ];
 
 let perfil = perfis[Math.floor(Math.random()*perfis.length)];
 
 document.getElementById("perfil").innerText = perfil;
 
-// análise detalhada simulada
-let detalhe = "";
+// análise detalhada estilo IA
+let texto="";
+
+if(exp > 70){
+texto+="Alta expressividade corporal detectada (gestos intensos ou dança). ";
+}else{
+texto+="Expressividade moderada ou contida. ";
+}
 
 if(energia > 70){
-detalhe += "Alta energia detectada. ";
+texto+="Nível elevado de energia de movimento. ";
 }else{
-detalhe += "Energia moderada ou baixa. ";
+texto+="Energia de movimento equilibrada. ";
 }
 
 if(ego > 70){
-detalhe += "Traços de ego elevado observados. ";
+texto+="Traços de postura dominante e confiança elevada. ";
 }else{
-detalhe += "Ego equilibrado ou contido. ";
+texto+="Postura equilibrada e controlada. ";
 }
 
-detalhe += "Perfil comportamental classificado como " + perfil + ". ";
-detalhe += "Baseado em microexpressões e estabilidade visual estimada.";
+texto+="Análise baseada em microvariações de movimento, posição da câmera e padrão visual estimado.";
 
-document.getElementById("detalhado").innerText = detalhe;
+document.getElementById("detalhe").innerText = texto;
 
-document.getElementById("timer").innerText = "ANÁLISE FINALIZADA";
+document.getElementById("timer").innerText =
+"ANÁLISE FINALIZADA";
 }
 
-function trocarCamera(){
+function flipCamera(){
 
-facingMode = (facingMode === "user")
-? "environment"
-: "user";
+facing = (facing==="user")?"environment":"user";
 
 start();
-
 }
 
 </script>
