@@ -1,384 +1,184 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>SIX SEVEN</title>
 
 <style>
-
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial,sans-serif;
-}
-
 body{
-
+margin:0;
+font-family:Arial;
 background:#0b0b0b;
 color:white;
 text-align:center;
-
 }
 
 header{
-
-padding:25px;
-
-background:#111;
-
+padding:20px;
 border-bottom:2px solid #D4AF37;
-
 box-shadow:0 0 20px #D4AF37;
-
 }
 
 h1{
-
 color:#D4AF37;
-
-font-size:38px;
-
 letter-spacing:4px;
-
+margin:0;
 }
 
-p{
-
-color:#ddd;
-
-}
-
-.container{
-
-padding:20px;
-
-}
+small{color:#aaa;}
 
 video{
-
-width:95%;
-
-max-width:420px;
-
-border-radius:25px;
-
-border:3px solid #D4AF37;
-
-box-shadow:0 0 25px #D4AF37;
-
+width:90%;
+max-width:400px;
 margin-top:20px;
-
+border-radius:20px;
+border:2px solid #D4AF37;
+box-shadow:0 0 20px #D4AF37;
 }
 
 button{
-
 margin-top:20px;
-
-padding:15px 35px;
-
-font-size:18px;
-
+padding:15px 25px;
 background:#D4AF37;
-
-color:black;
-
 border:none;
-
-border-radius:50px;
-
-cursor:pointer;
-
+border-radius:30px;
 font-weight:bold;
-
+cursor:pointer;
 }
 
 button:hover{
-
 transform:scale(1.05);
-
 }
 
 .card{
-
 background:#161616;
-
-padding:20px;
-
-margin-top:20px;
-
-border-radius:20px;
-
-width:95%;
-
-max-width:450px;
-
-margin-left:auto;
-
-margin-right:auto;
-
+margin:15px auto;
+padding:15px;
+width:90%;
+max-width:400px;
+border-radius:15px;
 border:1px solid #D4AF37;
-
-box-shadow:0 0 15px rgba(212,175,55,.3);
-
 }
 
-h2{
-
-color:#D4AF37;
-
-margin-bottom:10px;
-
-}
-
-.barra{
-
-height:22px;
-
+.bar{
+height:18px;
 background:#333;
-
-border-radius:50px;
-
+border-radius:20px;
 overflow:hidden;
-
-margin-top:10px;
-
 }
 
-.preenchimento{
-
+.fill{
 height:100%;
-
-width:0;
-
-background:linear-gradient(
-90deg,
-#D4AF37,
-#F5D76E
-);
-
+width:0%;
+background:linear-gradient(90deg,#D4AF37,#F5D76E);
 transition:1s;
-
 }
 
-.valor{
-
-margin-top:10px;
-
+#timer{
 font-size:22px;
-
-font-weight:bold;
-
+color:#F5D76E;
+margin-top:10px;
 }
 
 #perfil{
-
-font-size:32px;
-
-margin-top:15px;
-
+font-size:26px;
 color:#F5D76E;
-
+margin-top:10px;
 }
-
-footer{
-
-margin-top:40px;
-
-padding:20px;
-
-color:#888;
-
-}
-
 </style>
-
 </head>
 
 <body>
 
 <header>
-
 <h1>SIX SEVEN</h1>
-
-<p>Black Gold Edition</p>
-
+<small>Black Gold Edition</small>
 </header>
 
-<div class="container">
+<video id="video" autoplay playsinline></video>
 
-<video
-id="camera"
-autoplay
-playsinline>
-</video>
+<br/>
 
-<br>
+<button onclick="start()">INICIAR ANÁLISE</button>
 
-<button onclick="iniciar()">
-
-INICIAR ANÁLISE
-
-</button>
+<div id="timer">50s</div>
 
 <div class="card">
-
-<h2>🌟 Energia</h2>
-
-<div class="barra">
-
-<div
-class="preenchimento"
-id="energiaBar">
-</div>
-
-</div>
-
-<div
-class="valor"
-id="energia">
-
-0%
-
-</div>
-
+<h3>🌟 Energia</h3>
+<div class="bar"><div id="energiaBar" class="fill"></div></div>
+<p id="energiaTxt">0%</p>
 </div>
 
 <div class="card">
-
-<h2>🧠 Presença</h2>
-
-<div class="barra">
-
-<div
-class="preenchimento"
-id="presencaBar">
-</div>
-
-</div>
-
-<div
-class="valor"
-id="presenca">
-
-0%
-
-</div>
-
+<h3>🧠 Presença</h3>
+<div class="bar"><div id="presencaBar" class="fill"></div></div>
+<p id="presencaTxt">0%</p>
 </div>
 
 <div class="card">
-
-<h2>⭐ Perfil</h2>
-
-<div id="perfil">
-
--
-
+<h3>⭐ Perfil</h3>
+<div id="perfil">-</div>
 </div>
-
-</div>
-
-</div>
-
-<footer>
-
-SIX SEVEN © 2026
-
-</footer>
 
 <script>
 
-async function iniciar(){
+let time = 50;
+let interval;
 
-try{
+async function start(){
 
-const stream =
-await navigator
-.mediaDevices
-.getUserMedia({
+const video = document.getElementById("video");
 
+const stream = await navigator.mediaDevices.getUserMedia({
 video:true
-
 });
 
-camera.srcObject =
-stream;
+video.srcObject = stream;
 
-setTimeout(analisar,3000);
-
-}
-catch{
-
-alert(
-"Permita o acesso à câmera."
-);
-
+interval = setInterval(runTimer,1000);
 }
 
+function runTimer(){
+
+time--;
+
+document.getElementById("timer").innerText = time + "s";
+
+if(time <= 0){
+clearInterval(interval);
+analyze();
+}
 }
 
-function analisar(){
+function analyze(){
 
-const energia =
-Math.floor(
-Math.random()*100
-);
+// simulação de análise comportamental visual
+let energia = Math.floor(Math.random()*100);
+let presenca = Math.floor(Math.random()*100);
 
-const presenca =
-Math.floor(
-Math.random()*100
-);
+document.getElementById("energiaBar").style.width = energia+"%";
+document.getElementById("presencaBar").style.width = presenca+"%";
 
-energiaBar.style.width =
-energia+"%";
+document.getElementById("energiaTxt").innerText = energia+"%";
+document.getElementById("presencaTxt").innerText = presenca+"%";
 
-presencaBar.style.width =
-presenca+"%";
-
-energia.innerHTML =
-energia+"%";
-
-presenca.innerHTML =
-presenca+"%";
-
-const perfis=[
-
+let perfis = [
 "LÍDER",
-
 "CRIATIVO",
-
 "ANALÍTICO",
-
 "COMUNICADOR",
-
 "EQUILIBRADO"
-
 ];
 
-const sorteado =
+let perfil = perfis[Math.floor(Math.random()*perfis.length)];
 
-perfis[
+document.getElementById("perfil").innerText = perfil;
 
-Math.floor(
-
-Math.random()
-
-*perfis.length
-
-)
-
-];
-
-perfil.innerHTML =
-sorteado;
-
+document.getElementById("timer").innerText = "ANÁLISE FINALIZADA";
 }
 
 </script>
 
 </body>
-
 </html>
