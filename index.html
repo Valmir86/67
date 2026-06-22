@@ -4,114 +4,36 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SIX SEVEN</title>
-
 <style>
-body{
-margin:0;
-font-family:Arial;
-background:#0b0b0b;
-color:white;
-text-align:center;
-}
-
-header{
-padding:18px;
-border-bottom:2px solid #D4AF37;
-box-shadow:0 0 20px #D4AF37;
-}
-
-h1{
-color:#D4AF37;
-letter-spacing:5px;
-margin:0;
-}
-
-small{color:#aaa;}
-
-video{
-width:92%;
-max-width:420px;
-margin-top:15px;
-border-radius:20px;
-border:2px solid #D4AF37;
-box-shadow:0 0 20px #D4AF37;
-}
-
-button{
-margin:8px;
-padding:12px 18px;
-background:#D4AF37;
-border:none;
-border-radius:30px;
-font-weight:bold;
-cursor:pointer;
-}
-
-button:hover{transform:scale(1.05);}
-
-.card{
-background:#161616;
-margin:12px auto;
-padding:14px;
-width:92%;
-max-width:420px;
-border-radius:15px;
-border:1px solid #D4AF37;
-}
-
-.bar{
-height:16px;
-background:#333;
-border-radius:20px;
-overflow:hidden;
-}
-
-.fill{
-height:100%;
-width:0%;
-background:linear-gradient(90deg,#D4AF37,#F5D76E);
-transition:1s;
-}
-
-#timer{
-font-size:20px;
-color:#F5D76E;
-margin-top:8px;
-}
-
-#perfil{
-font-size:26px;
-color:#F5D76E;
-margin-top:10px;
-}
-
-#detalhe{
-color:#ccc;
-font-size:13px;
-margin-top:10px;
-line-height:1.5;
-}
+body{ margin:0; font-family:Arial,sans-serif; background:#0b0b0b; color:white; text-align:center; }
+header{ padding:20px; border-bottom:2px solid #D4AF37; box-shadow:0 0 20px #D4AF37; }
+h1{ color:#D4AF37; letter-spacing:5px; }
+small{ color:#aaa; }
+video{ width:92%; max-width:420px; border-radius:20px; margin-top:15px; border:2px solid #D4AF37; box-shadow:0 0 20px #D4AF37; }
+button{ margin:8px; padding:12px 18px; background:#D4AF37; border:none; border-radius:30px; font-weight:bold; cursor:pointer; }
+button:hover{ transform:scale(1.05); }
+.card{ background:#161616; width:92%; max-width:420px; margin:12px auto; padding:15px; border-radius:15px; border:1px solid #D4AF37; }
+.bar{ height:16px; background:#333; border-radius:20px; overflow:hidden; }
+.fill{ height:100%; width:0%; background:linear-gradient(90deg, #D4AF37, #F5D76E); transition:1s; }
+#aurea{ font-size:50px; color:#F5D76E; }
+#perfil{ font-size:28px; color:#F5D76E; }
+#timer{ font-size:22px; margin-top:10px; color:#F5D76E; }
+#winner{ color:#F5D76E; margin-top: 10px; }
 </style>
 </head>
-
 <body>
-
 <header>
 <h1>SIX SEVEN</h1>
 <small>Black Gold Intelligence</small>
 </header>
-
 <video id="video" autoplay playsinline></video>
-
 <br>
-
-<button onclick="start()">INICIAR ANÁLISE</button>
+<button onclick="iniciarModo('normal')">INICIAR ANÁLISE</button>
 <button onclick="flipCamera()">INVERTER CÂMERA</button>
-
-<div id="timer">50s</div>
+<div id="timer">25s</div>
 
 <div class="card">
-<h3>🌟 Energia de Movimento</h3>
+<h3>🌟 Energia</h3>
 <div class="bar"><div id="energiaBar" class="fill"></div></div>
 <p id="energiaTxt">0%</p>
 </div>
@@ -129,112 +51,121 @@ line-height:1.5;
 </div>
 
 <div class="card">
+<h3>✨ ÁUREA TOTAL</h3>
+<h1 id="aurea">0</h1>
+<p id="classeAurea">Aguardando análise</p>
+</div>
+
+<div class="card">
 <h3>⭐ Perfil</h3>
 <div id="perfil">-</div>
+<p id="detalhe">Aguardando análise...</p>
+</div>
 
-<div id="detalhe">Aguardando análise...</div>
+<div class="card">
+    <h3>⚔️ BATALHA DUPLA</h3>
+    <button onclick="iniciarModo('p1')">JOGADOR 1</button>
+    <button onclick="iniciarModo('p2')">JOGADOR 2</button>
+    <p>P1: <span id="a1">0</span> | P2: <span id="a2">0</span></p>
+    <h2 id="winner">-</h2>
 </div>
 
 <script>
+// CONFIGURAÇÃO DOS SONS E VOZ
+const sons = {
+    inicio: new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg'),
+    tick: new Audio('https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg'),
+    fim: new Audio('https://actions.google.com/sounds/v1/alarms/mechanical_clock_ring.ogg'),
+    vitoria: new Audio('https://actions.google.com/sounds/v1/cartoon/success_fanfare.ogg')
+};
 
-let time = 15;
-let interval;
-let stream;
-let facing = "user";
-let motionSeed = 0;
+// Função para falar texto
+function falar(texto) {
+    const msg = new SpeechSynthesisUtterance(texto);
+    msg.lang = 'pt-BR';
+    msg.rate = 1.0;
+    window.speechSynthesis.speak(msg);
+}
 
-async function start(){
+let time=25, interval, stream, facing="user";
+let modoAtual = 'normal';
+let scoreP1 = 0, scoreP2 = 0;
 
-time = 15;
-
-stream = await navigator.mediaDevices.getUserMedia({
-video:{facingMode:facing}
-});
-
-document.getElementById("video").srcObject = stream;
-
-interval = setInterval(loop,1000);
+async function iniciarModo(modo) {
+    sons.inicio.play();
+    falar("Iniciando análise. Prepare-se.");
+    modoAtual = modo;
+    clearInterval(interval);
+    time = 25;
+    document.getElementById("timer").innerHTML = time + "s";
+    
+    if(stream) stream.getTracks().forEach(track => track.stop());
+    stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:facing}});
+    video.srcObject = stream;
+    interval = setInterval(loop, 1000);
 }
 
 function loop(){
+    time--;
+    sons.tick.play();
+    document.getElementById("timer").innerHTML = time + "s";
+    
+    let energia = Math.floor(Math.random()*101);
+    let ego = Math.floor(Math.random()*101);
+    let exp = Math.floor(Math.random()*101);
 
-time--;
+    document.getElementById("energiaBar").style.width = energia+"%";
+    document.getElementById("egoBar").style.width = ego+"%";
+    document.getElementById("expBar").style.width = exp+"%";
+    document.getElementById("energiaTxt").innerHTML = energia+"%";
+    document.getElementById("egoTxt").innerHTML = ego+"%";
+    document.getElementById("expTxt").innerHTML = exp+"%";
 
-document.getElementById("timer").innerText = time + "s";
-
-// simula variação de movimento (dança/gestos)
-motionSeed = Math.random()*100;
-
-// métricas simuladas inteligentes
-let energia = Math.floor((motionSeed + Math.random()*50));
-let ego = Math.floor(Math.random()*100);
-let expressividade = Math.floor(motionSeed);
-
-document.getElementById("energiaBar").style.width = energia+"%";
-document.getElementById("egoBar").style.width = ego+"%";
-document.getElementById("expBar").style.width = expressividade+"%";
-
-document.getElementById("energiaTxt").innerText = energia+"%";
-document.getElementById("egoTxt").innerText = ego+"%";
-document.getElementById("expTxt").innerText = expressividade+"%";
-
-if(time <= 0){
-clearInterval(interval);
-result(energia,ego,expressividade);
-}
+    if(time <= 0){
+        clearInterval(interval);
+        sons.fim.play();
+        processarResultado(energia, ego, exp);
+    }
 }
 
-function result(energia,ego,exp){
+function processarResultado(energia, ego, exp) {
+    let aurea = Math.floor((energia*15 + ego*15 + exp*20 + Math.random()*1000));
+    if(aurea > 5000) aurea = 5000;
 
-let perfis=[
-"LÍDER",
-"CRIATIVO",
-"ANALÍTICO",
-"COMUNICADOR",
-"PERFORMER"
-];
-
-let perfil = perfis[Math.floor(Math.random()*perfis.length)];
-
-document.getElementById("perfil").innerText = perfil;
-
-// análise detalhada estilo IA
-let texto="";
-
-if(exp > 70){
-texto+="Alta expressividade corporal detectada (gestos intensos ou dança). ";
-}else{
-texto+="Expressividade moderada ou contida. ";
-}
-
-if(energia > 70){
-texto+="Nível elevado de energia de movimento. ";
-}else{
-texto+="Energia de movimento equilibrada. ";
-}
-
-if(ego > 70){
-texto+="Traços de postura dominante e confiança elevada. ";
-}else{
-texto+="Postura equilibrada e controlada. ";
-}
-
-texto+="Análise baseada em microvariações de movimento, posição da câmera e padrão visual estimado.";
-
-document.getElementById("detalhe").innerText = texto;
-
-document.getElementById("timer").innerText =
-"ANÁLISE FINALIZADA";
+    if(modoAtual === 'p1' || modoAtual === 'p2') {
+        if(modoAtual === 'p1') {
+            scoreP1 = aurea;
+            document.getElementById("a1").innerHTML = scoreP1;
+        } else {
+            scoreP2 = aurea;
+            document.getElementById("a2").innerHTML = scoreP2;
+        }
+        
+        if(scoreP1 > 0 && scoreP2 > 0) {
+            sons.vitoria.play();
+            let resultado = scoreP1 > scoreP2 ? "Jogador 1 venceu com " + scoreP1 : "Jogador 2 venceu com " + scoreP2;
+            document.getElementById("winner").innerHTML = scoreP1 > scoreP2 ? "🏆 JOGADOR 1 VENCEU" : "🏆 JOGADOR 2 VENCEU";
+            falar("Batalha finalizada. " + resultado + " pontos de áurea.");
+        } else {
+            falar("Análise do jogador " + (modoAtual === 'p1' ? "1" : "2") + " concluída.");
+        }
+    } else {
+        const perfis=["LÍDER", "CRIATIVO", "ANALÍTICO", "COMUNICADOR", "PERFORMER", "ESTRATÉGICO"];
+        let perfil = perfis[Math.floor(Math.random()*perfis.length)];
+        document.getElementById("perfil").innerHTML = perfil;
+        
+        document.getElementById("aurea").innerHTML = aurea;
+        document.getElementById("classeAurea").innerHTML = (aurea<1000 ? "⭐ Baixa" : aurea<2500 ? "⭐⭐ Média" : aurea<4000 ? "⭐⭐⭐ Alta" : "⭐⭐⭐⭐⭐ Lendária");
+        
+        falar("Análise concluída. Perfil detectado: " + perfil + ". Áurea total de " + aurea + " pontos.");
+    }
+    document.getElementById("timer").innerHTML = "ANÁLISE FINALIZADA";
 }
 
 function flipCamera(){
-
-facing = (facing==="user")?"environment":"user";
-
-start();
+    facing = (facing==="user") ? "environment" : "user";
+    iniciarModo(modoAtual);
 }
-
 </script>
-
 </body>
 </html>
